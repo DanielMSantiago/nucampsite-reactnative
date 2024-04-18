@@ -1,7 +1,8 @@
 import { ScrollView, View, Text, FlatList } from "react-native";
 import { Card, ListItem, Avatar } from "react-native-elements";
-import { PARTNERS } from "../shared/partners";
-import { useState } from "react";
+import { useSelector } from "react-redux";
+import { baseUrl } from "../shared/baseUrl";
+
 const Mission = () => {
   return (
     <Card>
@@ -23,8 +24,7 @@ const Mission = () => {
 };
 
 const AboutScreen = () => {
-  const [partners, setPartners] = useState(PARTNERS);
-
+  const partners = useSelector((state) => state.partners);
   return (
     <ScrollView>
       <Mission />
@@ -33,10 +33,10 @@ const AboutScreen = () => {
           <Text>Community Partners</Text>
         </Card.Title>
         <Card.Divider />
-        {partners.map((partner) => {
+        {partners.partnersArray.map((partner) => {
           return (
             <ListItem key={partner.id}>
-              <Avatar source={partner.image} rounded />
+              <Avatar source={{ uri: baseUrl + partner.image }} rounded />
               <ListItem.Content>
                 <ListItem.Title>{partner.name}</ListItem.Title>
                 <ListItem.Subtitle>{partner.description}</ListItem.Subtitle>
