@@ -1,4 +1,12 @@
-import { Platform, StyleSheet, View, Image, Text } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  View,
+  Image,
+  Text,
+  Alert,
+  ToastAndroid,
+} from "react-native";
 import Constants from "expo-constants";
 import CampsiteInfoScreen from "./CampsiteInfoScreen";
 import FavoritesScreen from "./FavoritesScreen";
@@ -9,6 +17,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "./HomeScreen";
 import AboutScreen from "./AboutScreen";
 import ContactScreen from "./ContactScreen";
+import NetInfo from "@react-native-community/netinfo";
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
@@ -228,6 +237,42 @@ const Main = () => {
     dispatch(fetchPartners());
     dispatch(fetchComments());
   }, [dispatch]);
+
+  useEffect(() => {
+    NetInfo.fetch().then((connectionInfo) => {
+      Platform.OS === "ios"
+        ? Alert.alert("Initial Network Connectivity Type:", connectionInfo.type)
+        : ToastAndroid.show(
+            "Initial Network Connectivity Type: " + connectionInfo.type,
+            ToastAndroid.LONG
+          );
+      const unsubscribeNetInfo = NetInfo.addEventListener((connectionInfo) => {
+        handleConnectivityChange(connectionInfo);
+      });
+      return unsubscribeNetInfo;
+    });
+  }, []);
+
+  const handleConnectivityChange = (connectionInfo) => {
+    let connectionMsg = "You are now connected to an active network";
+    switch (connectionInfo.type) {
+      case "none":
+        connectionMsg = "No network connection is active.";
+        break;
+      case "unknown":
+        connectionMsg = "The network connection state is now unknown.";
+        break;
+      case "cellular":
+        connectionMsg = "You are now connected to a cellular network.";
+        break;
+      case "wifi":
+        connectionMsg = "You are now connected to a WiFi network.";
+        break;
+    }
+    Platform.OS === "ios"
+      ? Alert.alert("Connection change:", connectionMsg)
+      : ToastAndroid.show(connectionMsg, ToastAndroid.LONG);
+  };
 
   return (
     <View
