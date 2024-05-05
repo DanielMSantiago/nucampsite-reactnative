@@ -24,7 +24,7 @@ import {
   DrawerItem,
   DrawerItemList,
 } from "@react-navigation/drawer";
-
+import * as MediaLibrary from "expo-media-library";
 import { Icon } from "react-native-elements";
 import logo from "../assets/images/logo.png";
 import { useDispatch } from "react-redux";
@@ -238,19 +238,25 @@ const Main = () => {
     dispatch(fetchComments());
   }, [dispatch]);
 
-  useEffect(() => {
-    NetInfo.fetch().then((connectionInfo) => {
+  const showNetInfo = async () => {
+    const netInfo = await NetInfo.fetch();
+
+    if (netInfo) {
       Platform.OS === "ios"
-        ? Alert.alert("Initial Network Connectivity Type:", connectionInfo.type)
+        ? Alert.alert("Initial Network Connectivity Type: ", netInfo)
         : ToastAndroid.show(
-            "Initial Network Connectivity Type: " + connectionInfo.type,
+            "Initial Network Connectivity Type: " + netInfo,
             ToastAndroid.LONG
           );
-      const unsubscribeNetInfo = NetInfo.addEventListener((connectionInfo) => {
-        handleConnectivityChange(connectionInfo);
-      });
+      const unsubscribeNetInfo = NetInfo.addEventListener(
+        handleConnectivityChange
+      );
       return unsubscribeNetInfo;
-    });
+    }
+  };
+
+  useEffect(() => {
+    showNetInfo();
   }, []);
 
   const handleConnectivityChange = (connectionInfo) => {
